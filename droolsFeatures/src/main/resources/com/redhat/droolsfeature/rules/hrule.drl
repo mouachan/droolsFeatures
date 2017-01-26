@@ -1,0 +1,61 @@
+package com.redhat.droolsfeature.rules
+
+
+declare Customer
+    frequent: boolean
+    market: BzrMarketDeclare
+    reduction: int
+end
+
+declare  BzrMarketDeclare
+    region : String
+    airport : String
+    state : String
+    world : String
+    city : String
+    country : String
+    matchMap : java.util.HashMap
+end
+
+function void addMatch( BzrMarketDeclare k, String keywordName, int levelOfMatch ) {
+    if (k.getMatchMap() == null) k.setMatchMap(new java.util.HashMap<String,Integer>());
+        k.getMatchMap().put(keywordName,levelOfMatch);
+}
+
+
+rule "MKT1"
+when
+     BzrMarketDeclare("MKT1" not memberOf matchMap, airport == "LIL" , lom : 1, myk: this )
+   or  BzrMarketDeclare("MKT1" not memberOf matchMap, airport == "CDG" , lom : 1, myk: this )
+   or BzrMarketDeclare("MKT1" not memberOf matchMap, region == "EUROP" , city != "PAR" , city != "LYO" , city != "NCE" , city != "LIL" , city != "LIS" , lom : 5, myk: this)
+  
+then
+        addMatch(myk, "MKT1", lom);
+        update(myk);  
+end
+
+rule "MKT2"
+when
+     BzrMarketDeclare("MKT2" not memberOf matchMap, airport == "TOTO" , lom : 1, myk: this )
+   or  BzrMarketDeclare("MKT2" not memberOf matchMap, airport == "CDG" , lom : 1, myk: this )
+   or BzrMarketDeclare("MKT2" not memberOf matchMap, region == "EUROP" , city != "PAR" , city != "LYO" , city != "NCE" , city != "LIL" , city != "LIS" , lom : 5, myk: this)
+  
+then
+        addMatch(myk, "MKT2", lom);
+        update(myk);  
+end
+
+
+
+
+rule "ruleUsingMkt"
+
+when
+    c : Customer( frequent == true )
+    BzrMarketDeclare( "MKT1" memberOf matchMap ) from c.market // if you remove from it works!
+then
+    c.setReduction(12);
+end
+
+
+

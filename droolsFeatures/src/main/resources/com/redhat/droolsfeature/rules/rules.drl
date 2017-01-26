@@ -1,0 +1,31 @@
+package com.redhat.droolsfeature.rules 
+
+import com.redhat.droolsfeature.model.*;
+
+function void addMatch( BzrFlightDeclare k, String keywordName, int levelOfMatch ) {
+    BzrFlightMatchDeclare match = new BzrFlightMatchDeclare();
+    match.setName(keywordName);
+    match.setLom(levelOfMatch);
+    if (k.getMatchList() == null) k.setMatchList(new java.util.ArrayList()); 
+          k.getMatchList().add(match);
+}
+
+rule "add match"
+dialect "mvel"
+no-loop true
+when
+    k := BzrFlightDeclare( airline.equals("1A") , $lom:5)
+	not (exists BzrFlightMatchDeclare(name == "FLG1")) 
+then
+	addMatch(k, "FLG1", $lom);
+	insert(k.matchList.get(0));
+end
+
+rule "evaluate booking customer"
+dialect "mvel"
+when
+    b := Booking( customer!="Bobby")
+    exists BzrFlightMatchDeclare(name == "FLG1", lom == 5) 
+then
+	modify (b) {setCustomer("Bobby");}
+end

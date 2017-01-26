@@ -1,0 +1,40 @@
+package com.redhat.droolsfeature.rules
+
+
+declare  BzrFlightDeclare
+@propertyReactive
+    number : int 
+    airline : String 
+    matchMap : java.util.ArrayList 
+end
+
+function void initMap(BzrFlightDeclare keyword) {
+    if (keyword.getMatchMap() == null) keyword.setMatchMap(new java.util.ArrayList<String>()); 
+}
+
+rule "FLG1"
+when
+   BzrFlightDeclare(airline == "LH" , number == 500 , lom : 1 , keyword: this ) @watch ( *, !matchMap ) 
+    or BzrFlightDeclare(airline == "FR" , number == 400 , lom : 1 , keyword: this )   @watch ( *, !matchMap ) 
+    or BzrFlightDeclare(  airline == "TN" , number >= 400 , number <= 1000 , lom : 1 , keyword: this )  @watch ( *, !matchMap )
+then
+    initMap(keyword);
+    modify(keyword) { 
+    	getMatchMap().add("FLG1"); 
+    }
+end
+
+ 
+
+rule "FLG2"
+when 
+	BzrFlightDeclare(  airline == "QT" , number == 6660 , lom : 1 , keyword: this )  @watch ( *, !matchMap ) 
+    or BzrFlightDeclare(  number == 4400 , lom : 1 , keyword: this )  @watch ( *, !matchMap ) 
+    or BzrFlightDeclare(  airline == "LH" , number >= 500 , number <= 600 , lom : 1 , keyword: this )  @watch ( *, !matchMap ) 
+    or BzrFlightDeclare(  airline == "AF" , number >= 600 , number <= 777 , lom : 1 , keyword: this )  @watch ( *, !matchMap ) 
+then
+    initMap(keyword);
+    modify(keyword) { 
+    	getMatchMap().add("FLG2"); 
+    }
+end

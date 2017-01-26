@@ -1,0 +1,47 @@
+//created on: 6 déc. 2016
+package com.amadeus.droolsfeature.rules	
+
+//list any import classes here.
+import java.util.ArrayList
+
+
+//declare any global variables here
+declare FlightMatch
+   name : String = "AF"
+end
+
+declare Flight
+   name : String 
+   matchs : java.util.ArrayList
+end
+
+declare Customer
+   name : String
+end
+
+function void updateListMatch(Flight f, String name) {
+ 	FlightMatch fm = new FlightMatch();
+    fm.setName(name);
+    f.setMatchs(new java.util.ArrayList());
+    f.getMatchs().add(fm);
+}
+ 
+ rule "display"
+	when
+		f:Flight()
+    then
+    	System.out.println(f.getName());
+    end
+
+
+
+
+rule "FLG1"
+    when
+        f:Flight(name=="AF")
+        Customer(name =="Dupont")
+    then
+    	updateListMatch(f,"FLG1");
+    end
+
+

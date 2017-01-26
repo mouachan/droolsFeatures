@@ -1,0 +1,70 @@
+package com.redhat.droolsfeature.rules
+
+declare  BzrFlightDeclare
+    number : int
+    airline : String
+   // matchMap : java.util.concurrent.ConcurrentMap
+    matchMap : java.util.Collection
+   
+end
+
+ declare  Booking
+    @release( 0 )
+    customer : String
+    flight : BzrFlightDeclare
+    returnFlight : BzrFlightDeclare
+end
+ 
+
+function void addMatch( BzrFlightDeclare keyword, String keywordName, int levelOfMatch ) {
+    if (keyword.getMatchMap() == null) keyword.setMatchMap(new java.util.ArrayList<String>());
+   			 keyword.getMatchMap().add(keywordName);
+        //keyword.getMatchMap().put(keywordName, levelOfMatch);
+}
+
+ 
+
+ 
+
+rule "FLG1"
+no-loop true
+when
+    BzrFlightDeclare( "FLG1" not memberOf matchMap , airline == "1A" , number == 500 , lom : 1 , keyword: this )
+    or BzrFlightDeclare( "FLG1" not memberOf matchMap , airline == "6X" , number == 400 , lom : 1 , keyword: this )
+    or BzrFlightDeclare( "FLG1" not memberOf matchMap , airline == "LH" , number >= 400 , number <= 1000 , lom : 1 , keyword: this )
+then
+    addMatch(keyword, "FLG1", lom);
+    update(keyword);
+end
+
+ 
+
+rule "FLG2"
+no-loop true
+when
+    BzrFlightDeclare( "FLG2" not memberOf matchMap , airline == "QT" , number == 6660 , lom : 1 , keyword: this )
+    or BzrFlightDeclare( "FLG2" not memberOf matchMap , airline == "IO" , number == 4400 , lom : 1 , keyword: this )
+    or BzrFlightDeclare( "FLG2" not memberOf matchMap , airline == "LH" , number >= 500 , number <= 600 , lom : 1 , keyword: this )
+    or BzrFlightDeclare( "FLG2" not memberOf matchMap , airline == "AF" , number >= 600 , number <= 777 , lom : 1 , keyword: this )
+then
+    addMatch(keyword, "FLG2", lom);
+    update(keyword);
+end
+
+rule "client rule"
+when
+    f : BzrFlightDeclare( "FLG1" memberOf matchMap )
+    rf : BzrFlightDeclare( "FLG2" memberOf matchMap )
+    b : Booking( customer == "Bob", flight == f, returnFlight == rf )
+then
+	modify (b) {setCustomer("Bobby");}
+end
+
+ 
+
+rule "Name proxy hehe"
+when
+    b : Booking( customer=="Steve" )
+then
+	modify (b) {setCustomer("Bob");}
+end
